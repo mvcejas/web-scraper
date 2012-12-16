@@ -1,13 +1,9 @@
 <?php
-  
+	
 	include 'simple_html_dom.php';
 
 	session_start();
 	$_SESSION['COMPLETE_DATA'] = array();
-	
-	// INIT VARS	
-	$DriveSave = true;
-	$DBSave = false;
 
 
 	if(isset($_POST['URL'])){
@@ -124,7 +120,12 @@
 				$Marktrelease,
 				$Bild);			
 
-			array_push($_SESSION['COMPLETE_DATA'],$file_content);			
+			array_push($_SESSION['COMPLETE_DATA'],$file_content);	
+
+			// INIT VARS	
+			$DriveSave = false;
+			$DBSave = true;
+			$path = '.';
 
 			if($DriveSave){
 				/* enable $DriveSave = true if you want to save it on your drive */
@@ -132,21 +133,23 @@
 				fputcsv($fp, $file_header);
 				fputcsv($fp, $file_content);		
 				fclose($fp);				
-			}
-			
+			}	
+
 
 			if($DBSave){
 				/* enable $DBSave = true if you want to save this on your db */	
 
-				/* Please set your database connection here 			
+				/* Please set your database connection here 	 */		
 				define('DB_HOST','localhost');
-				define('DB_USER','root');
-				define('DB_PASS','');
-				define('DB_NAME','scraper');
+				define('DB_USER','User_0001');
+				define('DB_PASS','testingit');
+				define('DB_NAME','scrapeit');
+				/* haggen added this: */
+				define ('TABLE_NAME', 'scrape');
 
 				$sql = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
 				
-				$stmt = $sql->prepare("INSERT INTO {TABLE_NAME}(
+				$stmt = $sql->prepare("INSERT INTO scrape(
 					Kategorie,
 					Hersteller,
 					Artikelnummer,
@@ -173,7 +176,7 @@
 					$Marktrelease,
 					$Bild);
 				$stmt->execute();
-				*/
+				
 			}
 			return json_encode(array(
 				'status'=>true,
@@ -205,7 +208,7 @@
 				'Marktrelease',
 				'Bild');
 
-		if($DriveSave && count($_SESSION['COMPLETE_DATA'])>1){
+		if(count($_SESSION['COMPLETE_DATA'])>1){
 			$fp = fopen($path."complete_scrape_".time().".csv","w");
 			fputcsv($fp, $file_header);
 			foreach($_SESSION['COMPLETE_DATA'] as $a){
